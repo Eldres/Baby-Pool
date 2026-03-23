@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-baby-bg: #FFF8F0;
+  --color-baby-card: #FFFFFF;
+  --color-baby-sage: #84A98C;
+  --color-baby-sage-light: #B4CDB8;
+  --color-baby-sage-pale: #C8E0CC;
+  --color-baby-text: #3D2C35;
+  --color-baby-muted: #9A8490;
+  --color-baby-border: #F0E0E8;
+
+  --font-playfair: "Playfair Display", Georgia, serif;
+  --font-dm: "DM Sans", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-dm);
+  color: #3D2C35;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.22;
+  pointer-events: none;
+  animation: float 8s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-18px) scale(1.05);
+  }
+}
