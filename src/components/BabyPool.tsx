@@ -17,6 +17,7 @@ const DEFAULT_CONFIG: BabyConfig = {
   qrCodeUrl: null,
   qrCodeLabel: null,
   qrCodeMessage: null,
+  qrCodeLinkUrl: null,
   actualWeight_g: null,
   actualLength_cm: null,
   actualDob: null,
@@ -142,9 +143,21 @@ export default function BabyPool() {
               {config.qrCodeMessage && (
                 <p className="text-xs text-[#9A8490] mb-3 leading-relaxed">{config.qrCodeMessage}</p>
               )}
+              {config.qrCodeLinkUrl && (
+                <a
+                  href={config.qrCodeLinkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mb-3 w-full inline-block text-center px-4 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity hover:opacity-90"
+                  style={{ background: "linear-gradient(135deg, #3D95CE, #008CFF)" }}
+                >
+                  Support with Venmo
+                </a>
+              )}
               <Image
                 width={100}
                 height={100}
+                loading="eager"
                 src={config.qrCodeUrl}
                 alt="Venmo QR code"
                 className="w-full rounded-xl mb-3"

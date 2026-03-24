@@ -98,6 +98,7 @@ export async function POST(req: NextRequest) {
         qrCodeUrl: null,
         qrCodeLabel: null,
         qrCodeMessage: null,
+        qrCodeLinkUrl: null,
         actualWeight_g: null,
         actualLength_cm: null,
         actualDob: null,

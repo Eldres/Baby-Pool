@@ -80,6 +80,7 @@ export default function AdminPanel() {
   const [qrFile, setQrFile] = useState<File | null>(null);
   const [qrLabel, setQrLabel] = useState("");
   const [qrMessage, setQrMessage] = useState("");
+  const [qrLinkUrl, setQrLinkUrl] = useState("");
   const [qrUploading, setQrUploading] = useState(false);
   const [qrMsg, setQrMsg] = useState("");
 
@@ -115,6 +116,7 @@ export default function AdminPanel() {
         });
         setQrLabel(data.qrCodeLabel ?? "");
         setQrMessage(data.qrCodeMessage ?? "");
+        setQrLinkUrl(data.qrCodeLinkUrl ?? "");
       }
     });
 
@@ -164,6 +166,7 @@ export default function AdminPanel() {
         qrCodeUrl: url,
         qrCodeLabel: qrLabel || null,
         qrCodeMessage: qrMessage || null,
+        qrCodeLinkUrl: qrLinkUrl || null,
       });
       setQrMsg("QR code uploaded!");
       setQrFile(null);
@@ -179,6 +182,7 @@ export default function AdminPanel() {
       await updateDoc(doc(db, "config", "baby"), {
         qrCodeLabel: qrLabel || null,
         qrCodeMessage: qrMessage || null,
+        qrCodeLinkUrl: qrLinkUrl || null,
       });
       setQrMsg("Saved!");
     } catch (err) {
@@ -193,10 +197,12 @@ export default function AdminPanel() {
         qrCodeUrl: null,
         qrCodeLabel: null,
         qrCodeMessage: null,
+        qrCodeLinkUrl: null,
       });
       setQrMsg("QR code removed.");
       setQrLabel("");
       setQrMessage("");
+      setQrLinkUrl("");
     } catch (err) {
       setQrMsg(err instanceof Error ? err.message : "Error removing QR code.");
     }
@@ -214,6 +220,8 @@ export default function AdminPanel() {
           dueDate: null,
           qrCodeUrl: null,
           qrCodeLabel: null,
+          qrCodeMessage: null,
+          qrCodeLinkUrl: null,
           actualWeight_g: null,
           actualLength_cm: null,
           actualDob: null,
@@ -238,6 +246,7 @@ export default function AdminPanel() {
       qrCodeUrl: config?.qrCodeUrl ?? null,
       qrCodeLabel: qrLabel || null,
       qrCodeMessage: qrMessage || null,
+      qrCodeLinkUrl: config?.qrCodeLinkUrl ?? null,
     });
     if (!parsed.success) {
       const flat = parsed.error.flatten().fieldErrors;
@@ -460,14 +469,30 @@ export default function AdminPanel() {
               />
             </div>
 
+            <div className="mb-3">
+              <label className={labelClass}>Payment Link URL (optional)</label>
+              <input
+                className={inputClass}
+                placeholder="https://venmo.com/code?user_id=..."
+                value={qrLinkUrl}
+                onChange={(e) => setQrLinkUrl(e.target.value)}
+              />
+            </div>
+
             <div className="mb-4">
               <label className={labelClass}>Image file</label>
-              <input
-                type="file"
-                accept=".png,.jpg,.jpeg,.webp"
-                className="text-sm text-[#3D2C35]"
-                onChange={(e) => setQrFile(e.target.files?.[0] ?? null)}
-              />
+              <label
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#F0E0E8] bg-[#FFF8F0] text-sm text-[#3D2C35] cursor-pointer hover:border-[#84A98C] transition-colors"
+              >
+                Choose File
+                <input
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.webp"
+                  className="hidden"
+                  onChange={(e) => setQrFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
+              {qrFile && <span className="ml-2 text-sm text-[#9A8490]">{qrFile.name}</span>}
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">

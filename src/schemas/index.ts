@@ -17,6 +17,7 @@ export const BabyConfigSchema = z.object({
   qrCodeUrl: z.string().url().nullable(),
   qrCodeLabel: z.string().nullable(),
   qrCodeMessage: z.string().nullable(),
+  qrCodeLinkUrl: z.string().url().nullable(),
 });
 
 export const RevealSchema = z.object({
