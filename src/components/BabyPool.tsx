@@ -135,11 +135,11 @@ export default function BabyPool() {
 
       {/* Card area — two-column when QR code is configured */}
       <div className={`mx-auto px-4 ${config.qrCodeUrl ? "max-w-3xl" : "max-w-lg"}`}>
-        <div className={`flex gap-5 ${config.qrCodeUrl ? "flex-col md:flex-row items-start" : ""}`}>
+        <div className={`flex gap-4 ${config.qrCodeUrl ? "flex-col md:flex-row items-start" : ""}`}>
           {/* Main card */}
           <div
             role="tabpanel"
-            className="bg-white rounded-3xl p-8 fade-in flex-1"
+            className="bg-white rounded-3xl p-5 sm:p-8 fade-in flex-1 w-full min-w-0"
             style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.07)" }}
           >
             {tab === "guess" && !submitted && (
@@ -176,7 +176,7 @@ export default function BabyPool() {
           {/* QR Code panel */}
           {config.qrCodeUrl && (
             <div
-              className="bg-white rounded-3xl p-6 fade-in w-full md:w-52 shrink-0 flex flex-col items-center text-center"
+              className="bg-white rounded-3xl p-4 sm:p-6 fade-in w-full md:w-52 shrink-0 flex flex-col items-center text-center"
               style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.07)" }}
             >
               <div className="text-3xl mb-2">💰</div>

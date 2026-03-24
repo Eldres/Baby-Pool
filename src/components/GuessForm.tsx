@@ -55,7 +55,7 @@ export default function GuessForm({ onSubmitted, dueDate, showDobGuess }: Props)
     <form action={formAction}>
       <input type="hidden" name="metric" value={String(metric)} />
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h2 className="font-playfair text-[22px] font-bold text-[#3D2C35]">Your Guess</h2>
         <div
           className="flex rounded-full border border-[#F0E0E8] overflow-hidden text-xs font-medium"
