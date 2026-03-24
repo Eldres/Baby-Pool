@@ -18,7 +18,7 @@ A baby guessing pool where friends and family submit predictions for a newborn's
    npm install
    ```
 
-2. Copy `.env.local.example` to `.env.local` and fill in your Firebase config:
+2. Create a `.env.local` file and fill in your Firebase config:
    ```
    NEXT_PUBLIC_FIREBASE_API_KEY=
    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
@@ -61,19 +61,24 @@ npm run lint     # Run ESLint
 ## Features
 
 ### Public Page (`/`)
-- Guess form with imperial/metric toggle for weight and length
-- Conditional birth date guess (configurable from admin)
+- Guess form with imperial/metric unit toggle for weight and length
+- Conditional birth date guess field (configurable from admin)
 - Real-time leaderboard with scoring when results are revealed
-- Venmo QR code panel with configurable payment link button
+- Guess spread summary showing highest/lowest weight and length guesses
+- Venmo QR code panel with configurable "Support with Venmo" payment link button
 - CSV export of all entries
+- Skeleton loading states while Firestore data loads
+- ARIA-accessible tab navigation and screen reader alerts
+- GitHub repo link in footer for forking
 
 ### Admin Panel (`/admin`)
 - Google SSO login (restricted to a single authorized email)
 - Configure baby name, header text, emoji, and due date
-- Toggle birth date guess visibility (auto / always shown / always hidden)
+- 3-state toggle for birth date guess visibility (auto / always shown / always hidden)
 - Upload Venmo QR code via Firebase Storage with configurable caption, message, and payment link URL
 - Enter actual birth results (weight, length, date)
-- Toggle results reveal for the public leaderboard
+- Toggle results reveal for the public leaderboard (disabled until actual results are saved)
+- Skeleton loading state during auth check
 
 ## Scoring
 
