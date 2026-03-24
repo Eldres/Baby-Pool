@@ -34,6 +34,18 @@ function formatLength(entry: Entry): string {
 export default function Leaderboard({ entries, config }: Props) {
   const isRevealed = config.isRevealed && config.actualWeight_g != null;
 
+  // Compute guess spread
+  const weights = entries.map((e) => e.weight_g);
+  const lengths = entries.map((e) => e.length_cm);
+  const minW = entries[weights.indexOf(Math.min(...weights))];
+  const maxW = entries[weights.indexOf(Math.max(...weights))];
+  const minL = entries[lengths.indexOf(Math.min(...lengths))];
+  const maxL = entries[lengths.indexOf(Math.max(...lengths))];
+  const lightestWeight = minW ? `${minW.weight_lb} lb ${minW.weight_oz} oz` : "";
+  const heaviestWeight = maxW ? `${maxW.weight_lb} lb ${maxW.weight_oz} oz` : "";
+  const shortestLength = minL ? formatLength(minL) : "";
+  const longestLength = maxL ? formatLength(maxL) : "";
+
   let displayEntries: (Entry & { rank?: number; score?: number })[] = [...entries];
 
   if (isRevealed) {
@@ -78,6 +90,41 @@ export default function Leaderboard({ entries, config }: Props) {
           </button>
         )}
       </div>
+
+      {entries.length >= 2 && (
+        <div className="grid grid-cols-2 gap-2.5 mb-5">
+          <div className="bg-[#FFF8F0] rounded-xl p-3 border border-[#F0E0E8]">
+            <div className="text-xs font-medium tracking-wider uppercase text-[#9A8490] mb-2">Weight Spread</div>
+            <div className="flex justify-between text-xs text-[#3D2C35] gap-2">
+              <div>
+                <span className="text-[#9A8490]">Low </span>
+                <span className="font-semibold">{lightestWeight}</span>
+                <div className="text-[10px] text-[#9A8490]">{minW?.name}</div>
+              </div>
+              <div className="text-right">
+                <span className="text-[#9A8490]">High </span>
+                <span className="font-semibold">{heaviestWeight}</span>
+                <div className="text-[10px] text-[#9A8490]">{maxW?.name}</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-[#FFF8F0] rounded-xl p-3 border border-[#F0E0E8]">
+            <div className="text-xs font-medium tracking-wider uppercase text-[#9A8490] mb-2">Length Spread</div>
+            <div className="flex justify-between text-xs text-[#3D2C35] gap-2">
+              <div>
+                <span className="text-[#9A8490]">Low </span>
+                <span className="font-semibold">{shortestLength}</span>
+                <div className="text-[10px] text-[#9A8490]">{minL?.name}</div>
+              </div>
+              <div className="text-right">
+                <span className="text-[#9A8490]">High </span>
+                <span className="font-semibold">{longestLength}</span>
+                <div className="text-[10px] text-[#9A8490]">{maxL?.name}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {entries.length === 0 && (
         <div className="text-center py-8 text-[#9A8490]">
