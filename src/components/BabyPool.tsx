@@ -7,6 +7,7 @@ import type { BabyConfig, Entry } from "@/types";
 import Bubbles from "./Bubbles";
 import GuessForm from "./GuessForm";
 import Leaderboard from "./Leaderboard";
+import Image from "next/image";
 
 const DEFAULT_CONFIG: BabyConfig = {
   babyName: "Baby",
@@ -141,7 +142,9 @@ export default function BabyPool() {
               {config.qrCodeMessage && (
                 <p className="text-xs text-[#9A8490] mb-3 leading-relaxed">{config.qrCodeMessage}</p>
               )}
-              <img
+              <Image
+                width={100}
+                height={100}
                 src={config.qrCodeUrl}
                 alt="Venmo QR code"
                 className="w-full rounded-xl mb-3"
@@ -157,6 +160,10 @@ export default function BabyPool() {
 
       <p className="text-center text-[#9A8490] text-xs mt-7 italic">
         Share this page with family &amp; friends so everyone can submit their guess ✨
+      </p>
+
+      <p>
+        Made with ❤️ by <a href="https://github.com/Eldres" target="_blank" rel="noopener noreferrer">Josh Nagel (AKA the baby&apos;s dad)</a>
       </p>
     </div>
   );
