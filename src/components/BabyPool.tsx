@@ -18,6 +18,7 @@ const DEFAULT_CONFIG: BabyConfig = {
   qrCodeLabel: null,
   qrCodeMessage: null,
   qrCodeLinkUrl: null,
+  showDobGuess: null,
   actualWeight_g: null,
   actualLength_cm: null,
   actualDob: null,
@@ -66,7 +67,7 @@ export default function BabyPool() {
       </div>
 
       {/* Tab Bar */}
-      <div className="flex justify-center gap-2 mb-7">
+      <div className="flex justify-center gap-2 mb-7" role="tablist">
         {(
           [
             ["guess", "✏️ Make My Guess"],
@@ -75,6 +76,8 @@ export default function BabyPool() {
         ).map(([key, label]) => (
           <button
             key={key}
+            role="tab"
+            aria-selected={tab === key}
             onClick={() => setTab(key)}
             className="px-5 py-2.5 rounded-full text-sm font-medium cursor-pointer border-none transition-all"
             style={{
@@ -96,11 +99,12 @@ export default function BabyPool() {
         <div className={`flex gap-5 ${config.qrCodeUrl ? "flex-col md:flex-row items-start" : ""}`}>
           {/* Main card */}
           <div
+            role="tabpanel"
             className="bg-white rounded-3xl p-8 fade-in flex-1"
             style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.07)" }}
           >
             {tab === "guess" && !submitted && (
-              <GuessForm onSubmitted={() => setSubmitted(true)} dueDate={config.dueDate} />
+              <GuessForm onSubmitted={() => setSubmitted(true)} dueDate={config.dueDate} showDobGuess={config.showDobGuess} />
             )}
 
             {tab === "guess" && submitted && (
@@ -176,7 +180,7 @@ export default function BabyPool() {
       </p>
 
       <p className="text-center text-[#9A8490] text-xs mt-2">
-        Made with ❤️ by <a href="https://github.com/Eldres" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#3D2C35] transition-colors">Josh Nagel (AKA the baby&apos;s dad)</a>
+        Made with ❤️ by <a href="https://github.com/Eldres" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#3D2C35] transition-colors">Josh Nagel</a>
       </p>
     </div>
   );

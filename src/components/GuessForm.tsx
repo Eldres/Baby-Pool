@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { EntrySchema } from "@/schemas";
+import { useState, useActionState, useEffect } from "react";
+import { useFormStatus } from "react-dom";
+import { submitEntry, type SubmitEntryState } from "@/app/actions";
 
 interface Props {
   onSubmitted: () => void;
   dueDate: string | null;
+  showDobGuess: boolean | null;
 }
 
 function offsetDate(base: string, days: number): string {
@@ -14,91 +16,35 @@ function offsetDate(base: string, days: number): string {
   return d.toISOString().split("T")[0];
 }
 
-// Convert kg → { lb, oz } for schema submission
-function kgToLbOz(kg: number): { lb: number; oz: number } {
-  const totalOz = kg * 35.274;
-  const lb = Math.floor(totalOz / 16);
-  const oz = Math.round(totalOz % 16);
-  return { lb, oz };
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="w-full py-3.5 rounded-2xl font-semibold text-base text-white cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed transition-opacity border-none"
+      style={{
+        background: "linear-gradient(135deg, #84A98C, #52796F)",
+        boxShadow: "0 6px 20px rgba(132,169,140,0.45)",
+        fontFamily: "var(--font-dm)",
+      }}
+    >
+      {pending ? "Submitting..." : "🍼 Submit My Guess!"}
+    </button>
+  );
 }
 
-// Convert cm → { in, fr } for schema submission
-function cmToInFr(cm: number): { inches: number; fr: number } {
-  const totalIn = cm / 2.54;
-  const inches = Math.floor(totalIn);
-  const fr = Math.round((totalIn - inches) * 10) / 10;
-  return { inches, fr };
-}
-
-export default function GuessForm({ onSubmitted, dueDate }: Props) {
+export default function GuessForm({ onSubmitted, dueDate, showDobGuess }: Props) {
+  const showDob = showDobGuess ?? !dueDate;
   const [metric, setMetric] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    weight_lb: "",
-    weight_oz: "",
-    weight_kg: "",
-    length_in: "",
-    length_fr: "",
-    length_cm: "",
-    dob: dueDate ?? "",
-  });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [state, formAction] = useActionState<SubmitEntryState | null, FormData>(
+    submitEntry,
+    null
+  );
 
-  async function handleSubmit() {
-    let weight_lb = form.weight_lb;
-    let weight_oz = form.weight_oz;
-    let length_in = form.length_in;
-    let length_fr = form.length_fr || "0";
-
-    if (metric) {
-      const kg = parseFloat(form.weight_kg);
-      const cm = parseFloat(form.length_cm);
-      if (isNaN(kg) || isNaN(cm)) {
-        setError("Please enter valid weight and length values.");
-        return;
-      }
-      const { lb, oz } = kgToLbOz(kg);
-      const { inches, fr } = cmToInFr(cm);
-      weight_lb = String(lb);
-      weight_oz = String(oz);
-      length_in = String(inches);
-      length_fr = String(fr);
-    }
-
-    const result = EntrySchema.safeParse({
-      name: form.name,
-      weight_lb,
-      weight_oz,
-      length_in,
-      length_fr,
-      dob: form.dob || null,
-    });
-
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
-      const first = Object.values(fieldErrors).flat()[0] as string | undefined;
-      setError(first ?? "Please check your entries.");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-
-    const res = await fetch("/api/entries", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(result.data),
-    });
-
-    if (res.ok) {
-      onSubmitted();
-    } else {
-      const data = await res.json();
-      setError(typeof data.error === "string" ? data.error : "Something went wrong.");
-    }
-    setLoading(false);
-  }
+  useEffect(() => {
+    if (state?.success) onSubmitted();
+  }, [state, onSubmitted]);
 
   const inputClass =
     "w-full px-3.5 py-2.5 border border-[#F0E0E8] rounded-xl text-sm bg-[#FFF8F0] text-[#3D2C35] outline-none focus:border-[#84A98C] transition-colors";
@@ -106,7 +52,9 @@ export default function GuessForm({ onSubmitted, dueDate }: Props) {
     "block text-xs font-medium tracking-widest uppercase text-[#9A8490] mb-1.5";
 
   return (
-    <div>
+    <form action={formAction}>
+      <input type="hidden" name="metric" value={String(metric)} />
+
       <div className="flex items-center justify-between mb-6">
         <h2 className="font-playfair text-[22px] font-bold text-[#3D2C35]">Your Guess</h2>
         <div
@@ -118,6 +66,7 @@ export default function GuessForm({ onSubmitted, dueDate }: Props) {
             return (
               <button
                 key={unit}
+                type="button"
                 onClick={() => setMetric(unit === "Metric")}
                 className="px-3 py-1.5 cursor-pointer border-none transition-colors"
                 style={{
@@ -136,9 +85,8 @@ export default function GuessForm({ onSubmitted, dueDate }: Props) {
         <label className={labelClass}>Your Name</label>
         <input
           className={inputClass}
+          name="name"
           placeholder="e.g. Grandma Linda"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
       </div>
 
@@ -149,12 +97,11 @@ export default function GuessForm({ onSubmitted, dueDate }: Props) {
             <input
               className={inputClass}
               type="number"
+              name="weight_kg"
               placeholder="e.g. 3.5"
               min="0.5"
               max="7"
               step="0.1"
-              value={form.weight_kg}
-              onChange={(e) => setForm({ ...form, weight_kg: e.target.value })}
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A8490] text-xs">kg</span>
           </div>
@@ -164,11 +111,10 @@ export default function GuessForm({ onSubmitted, dueDate }: Props) {
               <input
                 className={inputClass}
                 type="number"
+                name="weight_lb"
                 placeholder="Lbs"
                 min="1"
                 max="15"
-                value={form.weight_lb}
-                onChange={(e) => setForm({ ...form, weight_lb: e.target.value })}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A8490] text-xs">lb</span>
             </div>
@@ -176,11 +122,10 @@ export default function GuessForm({ onSubmitted, dueDate }: Props) {
               <input
                 className={inputClass}
                 type="number"
+                name="weight_oz"
                 placeholder="Oz"
                 min="0"
                 max="15"
-                value={form.weight_oz}
-                onChange={(e) => setForm({ ...form, weight_oz: e.target.value })}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A8490] text-xs">oz</span>
             </div>
@@ -195,12 +140,11 @@ export default function GuessForm({ onSubmitted, dueDate }: Props) {
             <input
               className={inputClass}
               type="number"
+              name="length_cm"
               placeholder="e.g. 50"
               min="35"
               max="66"
               step="0.5"
-              value={form.length_cm}
-              onChange={(e) => setForm({ ...form, length_cm: e.target.value })}
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A8490] text-xs">cm</span>
           </div>
@@ -210,11 +154,10 @@ export default function GuessForm({ onSubmitted, dueDate }: Props) {
               <input
                 className={inputClass}
                 type="number"
+                name="length_in"
                 placeholder="Inches"
                 min="14"
                 max="26"
-                value={form.length_in}
-                onChange={(e) => setForm({ ...form, length_in: e.target.value })}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A8490] text-xs">in</span>
             </div>
@@ -222,12 +165,11 @@ export default function GuessForm({ onSubmitted, dueDate }: Props) {
               <input
                 className={inputClass}
                 type="number"
+                name="length_fr"
                 placeholder="Fraction"
                 min="0"
                 max="0.9"
                 step="0.1"
-                value={form.length_fr}
-                onChange={(e) => setForm({ ...form, length_fr: e.target.value })}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A8490] text-xs">.in</span>
             </div>
@@ -235,24 +177,27 @@ export default function GuessForm({ onSubmitted, dueDate }: Props) {
         )}
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg px-3.5 py-2.5 mb-4 text-sm text-red-700">
-          {error}
+      {showDob && (
+        <div className="mb-6">
+          <label className={labelClass}>Birth Date Guess</label>
+          <input
+            className={inputClass}
+            type="date"
+            name="dob"
+            defaultValue={dueDate ?? undefined}
+            min={dueDate ? offsetDate(dueDate, -42) : undefined}
+            max={dueDate ? offsetDate(dueDate, 42) : undefined}
+          />
         </div>
       )}
 
-      <button
-        onClick={handleSubmit}
-        disabled={loading}
-        className="w-full py-3.5 rounded-2xl font-semibold text-base text-white cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed transition-opacity border-none"
-        style={{
-          background: "linear-gradient(135deg, #84A98C, #52796F)",
-          boxShadow: "0 6px 20px rgba(132,169,140,0.45)",
-          fontFamily: "var(--font-dm)",
-        }}
-      >
-        {loading ? "Submitting..." : "🍼 Submit My Guess!"}
-      </button>
-    </div>
+      {state?.error && (
+        <div role="alert" className="bg-red-50 border border-red-200 rounded-lg px-3.5 py-2.5 mb-4 text-sm text-red-700">
+          {state.error}
+        </div>
+      )}
+
+      <SubmitButton />
+    </form>
   );
 }

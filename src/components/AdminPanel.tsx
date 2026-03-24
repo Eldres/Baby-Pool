@@ -12,6 +12,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, auth, googleProvider, storage } from "@/lib/firebase";
 import { BabyConfigSchema, RevealSchema } from "@/schemas";
 import type { BabyConfig, Entry } from "@/types";
+import Image from "next/image";
 
 function computeScore(entry: Entry, config: BabyConfig): number {
   const actualWeightG = config.actualWeight_g!;
@@ -222,6 +223,7 @@ export default function AdminPanel() {
           qrCodeLabel: null,
           qrCodeMessage: null,
           qrCodeLinkUrl: null,
+          showDobGuess: null,
           actualWeight_g: null,
           actualLength_cm: null,
           actualDob: null,
@@ -247,6 +249,7 @@ export default function AdminPanel() {
       qrCodeLabel: qrLabel || null,
       qrCodeMessage: qrMessage || null,
       qrCodeLinkUrl: config?.qrCodeLinkUrl ?? null,
+      showDobGuess: config?.showDobGuess ?? null,
     });
     if (!parsed.success) {
       const flat = parsed.error.flatten().fieldErrors;
@@ -332,7 +335,7 @@ export default function AdminPanel() {
           </p>
 
           {authError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4 text-sm text-red-700">
+            <div role="alert" className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4 text-sm text-red-700">
               ⚠️ {authError}
             </div>
           )}
@@ -364,9 +367,11 @@ export default function AdminPanel() {
           <h1 className="font-playfair text-3xl font-bold text-[#3D2C35]">Admin Panel</h1>
           <div className="flex items-center gap-3">
             {user?.photoURL && (
-              <img
+              <Image
                 src={user.photoURL}
                 alt={user.displayName ?? ""}
+                width={28}
+                height={28}
                 className="w-7 h-7 rounded-full"
               />
             )}
@@ -422,6 +427,40 @@ export default function AdminPanel() {
                 onChange={(e) => setConfigForm({ ...configForm, dueDate: e.target.value })} />
               {configErrors.dueDate && <p className="text-xs text-red-500 mt-1">{configErrors.dueDate}</p>}
             </div>
+            <div className="mb-4">
+              <label className={labelClass}>Show Birth Date Guess</label>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const current = config?.showDobGuess;
+                    const newVal = current === null ? true : current ? false : null;
+                    if (config) {
+                      updateDoc(doc(db, "config", "baby"), { showDobGuess: newVal });
+                    }
+                  }}
+                  className="relative w-11 h-6 rounded-full transition-colors cursor-pointer border-none"
+                  style={{
+                    background:
+                      config?.showDobGuess === true ? "#84A98C"
+                        : config?.showDobGuess === false ? "#F0E0E8"
+                        : "#D1C4C9",
+                  }}
+                >
+                  <span
+                    className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform"
+                    style={{
+                      transform: config?.showDobGuess === true ? "translateX(20px)" : "translateX(0)",
+                    }}
+                  />
+                </button>
+                <span className="text-xs text-[#9A8490]">
+                  {config?.showDobGuess === true ? "Always shown"
+                    : config?.showDobGuess === false ? "Always hidden"
+                    : "Auto (hidden when due date is set)"}
+                </span>
+              </div>
+            </div>
             <div className="flex items-center gap-3">
               <button onClick={handleSaveConfig} className={btnClass}
                 style={{ background: "linear-gradient(135deg, #84A98C, #52796F)" }}>
@@ -441,15 +480,17 @@ export default function AdminPanel() {
             </p>
 
             {config.qrCodeUrl && (
-              <img
+              <Image
                 src={config.qrCodeUrl}
                 alt="Current QR code"
+                width={128}
+                height={128}
                 className="w-32 h-32 object-contain rounded-xl border border-[#F0E0E8] mb-3"
               />
             )}
 
             <div className="mb-3">
-              <label className={labelClass}>Caption (e.g. @nageljp)</label>
+              <label className={labelClass}>Caption (e.g. @venmo-username)</label>
               <input
                 className={inputClass}
                 placeholder="@yourhandle"
@@ -587,7 +628,7 @@ export default function AdminPanel() {
               Currently: <strong>{config.isRevealed && config.actualWeight_g != null ? "Revealed ✅" : "Hidden 🙈"}</strong>
             </p>
             {config.actualWeight_g == null && (
-              <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+              <p role="alert" className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
                 Enter and save actual results above before revealing scores.
               </p>
             )}
