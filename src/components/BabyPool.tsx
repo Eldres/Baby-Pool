@@ -162,8 +162,8 @@ export default function BabyPool() {
         Share this page with family &amp; friends so everyone can submit their guess ✨
       </p>
 
-      <p>
-        Made with ❤️ by <a href="https://github.com/Eldres" target="_blank" rel="noopener noreferrer">Josh Nagel (AKA the baby&apos;s dad)</a>
+      <p className="text-center text-[#9A8490] text-xs mt-2">
+        Made with ❤️ by <a href="https://github.com/Eldres" target="_blank" rel="noopener noreferrer" className="underline hover:text-[#3D2C35] transition-colors">Josh Nagel (AKA the baby&apos;s dad)</a>
       </p>
     </div>
   );
