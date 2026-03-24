@@ -315,9 +315,48 @@ export default function AdminPanel() {
     "px-5 py-2 rounded-xl text-sm font-medium text-white border-none cursor-pointer transition-opacity disabled:opacity-60";
 
   if (authChecking) {
+    const s = "animate-pulse bg-[#F0E0E8] rounded-lg";
+    const sec = "bg-white rounded-2xl p-6 mb-4 shadow-sm border border-[#F0E0E8]";
     return (
-      <div className="min-h-screen bg-[#FFF8F0] flex items-center justify-center">
-        <div className="text-[#9A8490] text-sm">Loading...</div>
+      <div className="min-h-screen bg-[#FFF8F0] px-4 py-10">
+        <div className="max-w-xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className={`w-40 h-8 ${s}`} />
+            <div className="flex items-center gap-3">
+              <div className={`w-7 h-7 rounded-full ${s}`} />
+              <div className={`w-12 h-4 ${s}`} />
+            </div>
+          </div>
+          <div className={sec}>
+            <div className={`w-28 h-5 mb-4 ${s}`} />
+            <div className={`w-24 h-3 mb-2 ${s}`} />
+            <div className={`w-full h-9 mb-3 ${s}`} />
+            <div className={`w-24 h-3 mb-2 ${s}`} />
+            <div className={`w-full h-9 mb-3 ${s}`} />
+            <div className={`w-16 h-3 mb-2 ${s}`} />
+            <div className={`w-full h-9 mb-4 ${s}`} />
+            <div className={`w-24 h-9 rounded-xl ${s}`} />
+          </div>
+          <div className={sec}>
+            <div className={`w-36 h-5 mb-4 ${s}`} />
+            <div className="flex gap-2 mb-3">
+              <div className={`flex-1 h-9 ${s}`} />
+              <div className={`flex-1 h-9 ${s}`} />
+            </div>
+            <div className={`w-24 h-9 rounded-xl ${s}`} />
+          </div>
+          <div className={sec}>
+            <div className={`w-28 h-5 mb-4 ${s}`} />
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex justify-between items-center py-3 border-b border-[#F0E0E8] last:border-0">
+                <div>
+                  <div className={`w-24 h-4 mb-1 ${s}`} />
+                  <div className={`w-40 h-3 ${s}`} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
