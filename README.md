@@ -32,22 +32,24 @@ A baby guessing pool where friends and family submit predictions for a newborn's
 
 3. Enable **Firestore**, **Authentication** (Google provider), and **Storage** in your Firebase Console.
 
-4. Deploy Firebase rules:
+4. In Firebase Console → Authentication → Settings → Authorized domains, add your production domain (e.g. `your-app.vercel.app`).
+
+5. Deploy Firebase rules:
    ```bash
    firebase deploy --only firestore:rules,storage
    ```
 
-5. Apply CORS config for Storage uploads (one-time):
+6. Apply CORS config for Storage uploads (one-time, requires [gcloud CLI](https://cloud.google.com/sdk/docs/install)):
    ```bash
    gcloud storage buckets update gs://YOUR-BUCKET.firebasestorage.app --cors-file=cors.json
    ```
 
-6. Start the dev server:
+7. Start the dev server:
    ```bash
    npm run dev
    ```
 
-7. Visit `localhost:3000/admin`, sign in with your authorized Google account, and click **Initialize Config** to seed the database.
+8. Visit `localhost:3000/admin`, sign in with your authorized Google account, and click **Initialize Config** to seed the database.
 
 ## Commands
 
@@ -61,15 +63,18 @@ npm run lint     # Run ESLint
 ## Features
 
 ### Public Page (`/`)
-- Guess form with imperial/metric unit toggle for weight and length
+- Guess form with imperial/metric unit toggle (metric values converted server-side)
 - Conditional birth date guess field (configurable from admin)
 - Real-time leaderboard with scoring when results are revealed
-- Guess spread summary showing highest/lowest weight and length guesses
-- Venmo QR code panel with configurable "Support with Venmo" payment link button
+- Guess spread summary showing highest/lowest weight and length guesses with guesser names
+- Venmo QR code panel with configurable message and "Support with Venmo" payment link button
 - CSV export of all entries
 - Skeleton loading states while Firestore data loads
+- Error boundaries with retry on both routes
+- Responsive mobile layout with adaptive padding
 - ARIA-accessible tab navigation and screen reader alerts
-- GitHub repo link in footer for forking
+- Decorative floating bubble animations
+- SEO metadata on all pages
 
 ### Admin Panel (`/admin`)
 - Google SSO login (restricted to a single authorized email)
@@ -95,6 +100,6 @@ Lower score = better guess. Entries without a birth date guess skip the date com
 Push to `main` — Vercel auto-deploys. Add all `.env.local` variables to your Vercel project's Environment Variables settings.
 
 ### Firebase Setup Checklist
-- [ ] Firestore: enabled with security rules deployed
-- [ ] Authentication: Google provider enabled, authorized domain added
-- [ ] Storage: enabled, rules deployed, CORS configured
+- [ ] Firestore: enabled with security rules deployed (`firebase deploy --only firestore:rules`)
+- [ ] Authentication: Google provider enabled, Vercel domain added to authorized domains
+- [ ] Storage: enabled, rules deployed (`firebase deploy --only storage`), CORS configured via `gcloud`
