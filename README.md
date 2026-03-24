@@ -1,27 +1,53 @@
 # Baby Pool
 
-A baby guessing pool where friends and family submit predictions for a newborn's weight, length, and birth date. Built with Next.js 16, TypeScript, Tailwind CSS, and Firebase Firestore.
+A baby guessing pool where friends and family submit predictions for a newborn's weight, length, and birth date. Built with Next.js 16, TypeScript, Tailwind CSS v4, and Firebase.
 
 ## Stack
 
-- **Next.js 16** — App Router, TypeScript, API routes
-- **Tailwind CSS v4** — custom pastel theme via `@theme`
-- **Firebase Firestore** — real-time data, no auth required for guests
-- **Zod** — end-to-end schema validation (shared client + server)
+- **Next.js 16** — App Router, Server Actions, error/loading boundaries, `next/image`
+- **React 19** — `useActionState`, `useFormStatus`, Server Components
+- **Tailwind CSS v4** — custom pastel theme via `@theme` tokens in `globals.css`
+- **Firebase** — Firestore (real-time data), Auth (Google SSO for admin), Storage (QR code uploads)
+- **Zod** — end-to-end schema validation shared between client and server
+- **TypeScript** — strict mode, types inferred from Zod schemas
 
 ## Getting Started
 
-1. Copy `.env.local` and fill in your Firebase config + admin password
-2. Enable Firestore in your Firebase Console (test mode is fine to start)
-3. Deploy Firestore security rules:
+1. Clone the repo and install dependencies:
    ```bash
-   firebase deploy --only firestore:rules
+   npm install
    ```
-4. Start the dev server:
+
+2. Copy `.env.local.example` to `.env.local` and fill in your Firebase config:
+   ```
+   NEXT_PUBLIC_FIREBASE_API_KEY=
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+   NEXT_PUBLIC_FIREBASE_APP_ID=
+   ADMIN_EMAIL=your-email@gmail.com
+   NEXT_PUBLIC_ADMIN_EMAIL=your-email@gmail.com
+   ```
+
+3. Enable **Firestore**, **Authentication** (Google provider), and **Storage** in your Firebase Console.
+
+4. Deploy Firebase rules:
+   ```bash
+   firebase deploy --only firestore:rules,storage
+   ```
+
+5. Apply CORS config for Storage uploads (one-time):
+   ```bash
+   gcloud storage buckets update gs://YOUR-BUCKET.firebasestorage.app --cors-file=cors.json
+   ```
+
+6. Start the dev server:
    ```bash
    npm run dev
    ```
-5. Visit `localhost:3000/admin`, log in, and click **Initialize Config** to seed the database
+
+7. Visit `localhost:3000/admin`, sign in with your authorized Google account, and click **Initialize Config** to seed the database.
 
 ## Commands
 
@@ -32,24 +58,38 @@ npm run start    # Start production server
 npm run lint     # Run ESLint
 ```
 
-## How It Works
+## Features
 
-- **Public (`/`)** — guests enter their name and guess the baby's weight, length, and birth date
-- **Admin (`/admin`)** — password-protected panel to:
-  - Set the baby's name, header text, and emoji
-  - Enter actual birth results after the baby arrives
-  - Toggle the results reveal so everyone can see who guessed closest
+### Public Page (`/`)
+- Guess form with imperial/metric toggle for weight and length
+- Conditional birth date guess (configurable from admin)
+- Real-time leaderboard with scoring when results are revealed
+- Venmo QR code panel with configurable payment link button
+- CSV export of all entries
+
+### Admin Panel (`/admin`)
+- Google SSO login (restricted to a single authorized email)
+- Configure baby name, header text, emoji, and due date
+- Toggle birth date guess visibility (auto / always shown / always hidden)
+- Upload Venmo QR code via Firebase Storage with configurable caption, message, and payment link URL
+- Enter actual birth results (weight, length, date)
+- Toggle results reveal for the public leaderboard
 
 ## Scoring
 
 Once actual results are entered and revealed, each entry is ranked by combined error:
 
 ```
-score = |weight_diff_g| + |length_diff_cm × 100| + |date_diff_days × 500|
+score = |weight_diff_g| + |length_diff_cm * 100| + |date_diff_days * 500|
 ```
 
-Lower score = better guess.
+Lower score = better guess. Entries without a birth date guess skip the date component.
 
 ## Deployment
 
 Push to `main` — Vercel auto-deploys. Add all `.env.local` variables to your Vercel project's Environment Variables settings.
+
+### Firebase Setup Checklist
+- [ ] Firestore: enabled with security rules deployed
+- [ ] Authentication: Google provider enabled, authorized domain added
+- [ ] Storage: enabled, rules deployed, CORS configured
