@@ -543,7 +543,7 @@ export default function AdminPanel() {
               <textarea
                 className={`${inputClass} resize-none`}
                 rows={3}
-                placeholder="e.g. All bets will go to help fund Rowan's 529 plan. Please scan to donate!"
+                placeholder="e.g. All guesses will go to help fund Rowan's 529 plan. Please scan to donate!"
                 value={qrMessage}
                 onChange={(e) => setQrMessage(e.target.value)}
               />
