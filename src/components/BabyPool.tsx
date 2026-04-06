@@ -21,6 +21,10 @@ const DEFAULT_CONFIG: BabyConfig = {
   showDobGuess: null,
   actualWeight_g: null,
   actualLength_cm: null,
+  actualWeight_lb: null,
+  actualWeight_oz: null,
+  actualLength_in: null,
+  actualLength_fr: null,
   actualDob: null,
   isRevealed: false,
 };
@@ -145,33 +149,44 @@ export default function BabyPool() {
           {/* Scoring Guide panel (left side) */}
           {showScoringPanel && (
             <div
-              className="bg-white rounded-3xl p-4 sm:p-6 fade-in w-full md:w-52 shrink-0 flex flex-col items-center text-center"
+              className="bg-white rounded-3xl p-4 sm:p-6 fade-in w-full md:w-64 shrink-0 flex flex-col items-center text-center"
               style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.07)" }}
             >
               <div className="text-3xl mb-2">📊</div>
               <h3 className="font-playfair font-bold text-[#3D2C35] text-base leading-snug mb-3">
                 Scoring Guide
               </h3>
-              <div className="text-left w-full space-y-2 text-xs text-[#3D2C35]">
-                <div className="flex justify-between">
-                  <span className="text-[#9A8490]">1 oz off</span>
-                  <span className="font-semibold">~28 pts</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#9A8490]">1 lb off</span>
-                  <span className="font-semibold">~454 pts</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#9A8490]">1 in off</span>
-                  <span className="font-semibold">~254 pts</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#9A8490]">1 day off</span>
-                  <span className="font-semibold">500 pts</span>
-                </div>
-              </div>
+              <p className="text-[11px] text-[#9A8490] mb-3">
+                Everyone starts at 10,000 points. Points are deducted for each unit you&apos;re off.
+              </p>
+              <table className="w-full text-xs text-[#3D2C35] border-collapse">
+                <thead>
+                  <tr className="text-[10px] uppercase tracking-wider text-[#9A8490]">
+                    <th className="text-left pb-2 font-medium">Miss</th>
+                    <th className="text-right pb-2 font-medium">Per unit</th>
+                    <th className="text-right pb-2 font-medium">Example</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#F0E0E8]">
+                  <tr>
+                    <td className="py-1.5 text-[#9A8490]">Weight</td>
+                    <td className="py-1.5 text-right font-semibold">−125 / oz</td>
+                    <td className="py-1.5 text-right text-[#9A8490]">4 oz = −500</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1.5 text-[#9A8490]">Length</td>
+                    <td className="py-1.5 text-right font-semibold">−635 / in</td>
+                    <td className="py-1.5 text-right text-[#9A8490]">0.5 in = −318</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1.5 text-[#9A8490]">Date</td>
+                    <td className="py-1.5 text-right font-semibold">−500 / day</td>
+                    <td className="py-1.5 text-right text-[#9A8490]">2 days = −1,000</td>
+                  </tr>
+                </tbody>
+              </table>
               <div className="mt-3 pt-3 border-t border-[#F0E0E8] w-full">
-                <p className="text-[10px] text-[#9A8490] italic">Lower score = closer guess</p>
+                <p className="text-[10px] text-[#9A8490] italic">Highest score wins!</p>
               </div>
             </div>
           )}

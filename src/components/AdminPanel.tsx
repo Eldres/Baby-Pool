@@ -14,6 +14,8 @@ import { BabyConfigSchema, RevealSchema } from "@/schemas";
 import type { BabyConfig, Entry } from "@/types";
 import Image from "next/image";
 
+const MAX_SCORE = 10_000;
+
 function computeScore(entry: Entry, config: BabyConfig): number {
   const actualWeightG = config.actualWeight_g!;
   const actualLengthCm = config.actualLength_cm!;
@@ -24,11 +26,11 @@ function computeScore(entry: Entry, config: BabyConfig): number {
     const daysDiff = Math.abs((actualDob - entryDob) / (1000 * 60 * 60 * 24));
     dobPoints = daysDiff * 500;
   }
-  return (
-    Math.abs(actualWeightG - entry.weight_g) +
-    Math.abs(actualLengthCm - entry.length_cm) * 100 +
-    dobPoints
-  );
+  const penalty =
+    Math.abs(actualWeightG - entry.weight_g) * 4.4 +
+    Math.abs(actualLengthCm - entry.length_cm) * 250 +
+    dobPoints;
+  return Math.max(0, MAX_SCORE - penalty);
 }
 
 function GoogleIcon() {
@@ -118,6 +120,15 @@ export default function AdminPanel() {
         setQrLabel(data.qrCodeLabel ?? "");
         setQrMessage(data.qrCodeMessage ?? "");
         setQrLinkUrl(data.qrCodeLinkUrl ?? "");
+        if (data.actualWeight_lb != null) {
+          setRevealForm({
+            actualWeight_lb: String(data.actualWeight_lb),
+            actualWeight_oz: String(data.actualWeight_oz ?? 0),
+            actualLength_in: String(data.actualLength_in ?? 0),
+            actualLength_fr: String(data.actualLength_fr ?? 0),
+            actualDob: data.actualDob ?? "",
+          });
+        }
       }
     });
 
@@ -226,6 +237,10 @@ export default function AdminPanel() {
           showDobGuess: null,
           actualWeight_g: null,
           actualLength_cm: null,
+          actualWeight_lb: null,
+          actualWeight_oz: null,
+          actualLength_in: null,
+          actualLength_fr: null,
           actualDob: null,
           isRevealed: false,
         },
@@ -287,7 +302,10 @@ export default function AdminPanel() {
     const actualWeight_g = Math.round(actualWeight_lb * 453.592 + actualWeight_oz * 28.3495);
     const actualLength_cm = Math.round((actualLength_in + actualLength_fr) * 2.54 * 10) / 10;
     try {
-      await updateDoc(doc(db, "config", "baby"), { actualWeight_g, actualLength_cm, actualDob });
+      await updateDoc(doc(db, "config", "baby"), {
+        actualWeight_g, actualLength_cm, actualDob,
+        actualWeight_lb, actualWeight_oz, actualLength_in, actualLength_fr,
+      });
       setRevealMsg("Results saved!");
     } catch (err) {
       setRevealMsg(err instanceof Error ? err.message : "Error saving results.");
@@ -396,7 +414,7 @@ export default function AdminPanel() {
   const sortedEntries = isRevealed && config
     ? [...entries]
         .map((e) => ({ ...e, score: computeScore(e, config) }))
-        .sort((a, b) => a.score - b.score)
+        .sort((a, b) => b.score - a.score)
     : entries;
 
   return (

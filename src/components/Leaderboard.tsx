@@ -7,6 +7,8 @@ interface Props {
   config: BabyConfig;
 }
 
+const MAX_SCORE = 10_000;
+
 function computeScore(entry: Entry, config: BabyConfig): number {
   const actualWeightG = config.actualWeight_g!;
   const actualLengthCm = config.actualLength_cm!;
@@ -17,11 +19,11 @@ function computeScore(entry: Entry, config: BabyConfig): number {
     const daysDiff = Math.abs((actualDob - entryDob) / (1000 * 60 * 60 * 24));
     dobPoints = daysDiff * 500;
   }
-  return (
-    Math.abs(actualWeightG - entry.weight_g) +
-    Math.abs(actualLengthCm - entry.length_cm) * 100 +
-    dobPoints
-  );
+  const penalty =
+    Math.abs(actualWeightG - entry.weight_g) * 4.4 +
+    Math.abs(actualLengthCm - entry.length_cm) * 250 +
+    dobPoints;
+  return Math.max(0, MAX_SCORE - penalty);
 }
 
 function formatLength(entry: Entry): string {
@@ -51,14 +53,14 @@ export default function Leaderboard({ entries, config }: Props) {
   if (isRevealed) {
     const scored: ScoredEntry[] = entries
       .map((e) => ({ ...e, score: computeScore(e, config), rank: 0 }))
-      .sort((a, b) => a.score - b.score)
+      .sort((a, b) => b.score - a.score)
       .map((e, i) => ({ ...e, rank: i + 1 }));
     displayEntries = scored;
   }
 
-  const winner = isRevealed && displayEntries.length > 0
-    ? (displayEntries[0] as ScoredEntry)
-    : null;
+  const podium = isRevealed
+    ? (displayEntries.slice(0, 3) as ScoredEntry[])
+    : [];
 
   function exportCSV() {
     const headers = ["Name", "Weight Guess", "Length Guess", "Birth Date Guess"];
@@ -130,37 +132,71 @@ export default function Leaderboard({ entries, config }: Props) {
         </div>
       )}
 
-      {winner && (
-        <div
-          className="fade-in rounded-2xl p-5 mb-5 text-center border-2 border-[#84A98C]"
-          style={{
-            background: "linear-gradient(135deg, #F0F7F1, #E8F5E9)",
-            boxShadow: "0 4px 20px rgba(132,169,140,0.25)",
-          }}
-        >
-          <div className="text-3xl mb-2">🏆</div>
-          <div className="text-xs font-medium tracking-wider uppercase text-[#84A98C] mb-1">
-            Winner
-          </div>
-          <div className="font-playfair font-bold text-xl text-[#3D2C35] mb-2">
-            {winner.name}
-          </div>
-          <div className="text-sm text-[#3D2C35] mb-1">
-            ⚖️ {winner.weight_lb} lb {winner.weight_oz} oz &nbsp;·&nbsp; 📏 {formatLength(winner)}
-          </div>
-          {winner.dob && (
-            <div className="text-sm text-[#3D2C35] mb-2">
-              📅 {winner.dob}
-            </div>
-          )}
-          <div
-            className="inline-block px-3 py-1 rounded-full text-sm font-semibold text-[#84A98C]"
-            style={{ background: "rgba(132,169,140,0.15)" }}
-          >
-            Score: {Math.round(winner.score).toLocaleString()}
+      {isRevealed && config.actualWeight_lb != null && (
+        <div className="fade-in rounded-xl p-4 mb-5 border border-[#F0E0E8] bg-white text-center">
+          <div className="text-xs font-medium tracking-wider uppercase text-[#9A8490] mb-2">Actual Results</div>
+          <div className="flex justify-center gap-4 text-sm text-[#3D2C35]">
+            <span>⚖️ {config.actualWeight_lb} lb {config.actualWeight_oz} oz</span>
+            <span>📏 {config.actualLength_in}{config.actualLength_fr ? `.${String(config.actualLength_fr).replace("0.", "")}` : ""} in</span>
+            {config.actualDob && <span>📅 {config.actualDob}</span>}
           </div>
         </div>
       )}
+
+      {podium.length > 0 && (() => {
+        const medals = ["🥇", "🥈", "🥉"];
+        const labels = ["Gold", "Silver", "Bronze"];
+        const borderColors = ["#D4AF37", "#A8A9AD", "#CD7F32"];
+        const bgGradients = [
+          "linear-gradient(135deg, #FFFBEA, #FFF3C4)",
+          "linear-gradient(135deg, #F5F5F5, #E8E8E8)",
+          "linear-gradient(135deg, #FFF0E0, #FFE4CC)",
+        ];
+        const renderCard = (entry: ScoredEntry, i: number) => (
+          <div
+            key={entry.id}
+            className="rounded-2xl p-4 text-center border-2"
+            style={{ borderColor: borderColors[i], background: bgGradients[i], boxShadow: `0 4px 16px ${borderColors[i]}33` }}
+          >
+            <div className="text-2xl mb-1">{medals[i]}</div>
+            <div className="text-[10px] font-medium tracking-wider uppercase mb-1" style={{ color: borderColors[i] }}>
+              {labels[i]}
+            </div>
+            <div className="font-playfair font-bold text-base text-[#3D2C35] mb-1 truncate">
+              {entry.name}
+            </div>
+            <div className="text-xs text-[#3D2C35] mb-0.5">
+              ⚖️ {entry.weight_lb} lb {entry.weight_oz} oz · 📏 {formatLength(entry)}
+            </div>
+            {entry.dob && (
+              <div className="text-xs text-[#3D2C35] mb-1.5">📅 {entry.dob}</div>
+            )}
+            <div
+              className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold"
+              style={{ color: borderColors[i], background: `${borderColors[i]}1A` }}
+            >
+              {Math.round(entry.score).toLocaleString()} pts
+            </div>
+          </div>
+        );
+        return (
+          <div className="fade-in mb-5">
+            {/* Gold — centered on top */}
+            <div className="flex justify-center mb-2.5">
+              <div className="w-full sm:w-2/3 md:w-1/2">
+                {renderCard(podium[0], 0)}
+              </div>
+            </div>
+            {/* Silver & Bronze — side by side below */}
+            {podium.length > 1 && (
+              <div className="grid grid-cols-2 gap-2.5">
+                {podium[1] && renderCard(podium[1], 1)}
+                {podium[2] && renderCard(podium[2], 2)}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {entries.length === 0 && (
         <div className="text-center py-8 text-[#9A8490]">
