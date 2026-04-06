@@ -66,6 +66,9 @@ npm run lint     # Run ESLint
 - Guess form with imperial/metric unit toggle (metric values converted server-side)
 - Conditional birth date guess field (configurable from admin)
 - Real-time leaderboard with scoring when results are revealed
+- Gold/Silver/Bronze podium display for top 3 guesses in a pyramid layout
+- Actual results card showing the real weight, length, and birth date
+- Scoring guide side panel explaining the point deduction system
 - Guess spread summary showing highest/lowest weight and length guesses with guesser names
 - Venmo QR code panel with configurable message and "Support with Venmo" payment link button
 - CSV export of all entries
@@ -81,19 +84,21 @@ npm run lint     # Run ESLint
 - Configure baby name, header text, emoji, and due date
 - 3-state toggle for birth date guess visibility (auto / always shown / always hidden)
 - Upload Venmo QR code via Firebase Storage with configurable caption, message, and payment link URL
-- Enter actual birth results (weight, length, date)
+- Enter actual birth results (weight, length, date) — values persist across sessions
 - Toggle results reveal for the public leaderboard (disabled until actual results are saved)
 - Skeleton loading state during auth check
 
 ## Scoring
 
-Once actual results are entered and revealed, each entry is ranked by combined error:
+Everyone starts with **10,000 points**. Points are deducted based on how far off each guess is:
 
-```
-score = |weight_diff_g| + |length_diff_cm * 100| + |date_diff_days * 500|
-```
+| Category | Rate | Example |
+|----------|------|---------|
+| Weight | −125 pts per oz | 4 oz off = −500 pts |
+| Length | −635 pts per in | 0.5 in off = −318 pts |
+| Date | −500 pts per day | 2 days off = −1,000 pts |
 
-Lower score = better guess. Entries without a birth date guess skip the date component.
+The categories are balanced so that a typical close miss in any one costs roughly the same (~500 pts). Highest score wins. Entries without a birth date guess skip the date component. Scores are floored at 0.
 
 ## Deployment
 
