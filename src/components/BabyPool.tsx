@@ -133,9 +133,49 @@ export default function BabyPool() {
         ))}
       </div>
 
-      {/* Card area — two-column when QR code is configured */}
-      <div className={`mx-auto px-4 ${config.qrCodeUrl ? "max-w-3xl" : "max-w-lg"}`}>
-        <div className={`flex gap-4 ${config.qrCodeUrl ? "flex-col md:flex-row items-start" : ""}`}>
+      {/* Card area — multi-column when side panels are active */}
+      {(() => {
+        const showScoringPanel = config.isRevealed && config.actualWeight_g != null;
+        const hasSidePanel = showScoringPanel || !!config.qrCodeUrl;
+        const hasBothPanels = showScoringPanel && !!config.qrCodeUrl;
+        const maxWidthClass = hasBothPanels ? "max-w-5xl" : hasSidePanel ? "max-w-3xl" : "max-w-lg";
+        return (
+      <div className={`mx-auto px-4 ${maxWidthClass}`}>
+        <div className={`flex gap-4 ${hasSidePanel ? "flex-col md:flex-row items-start" : ""}`}>
+          {/* Scoring Guide panel (left side) */}
+          {showScoringPanel && (
+            <div
+              className="bg-white rounded-3xl p-4 sm:p-6 fade-in w-full md:w-52 shrink-0 flex flex-col items-center text-center"
+              style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.07)" }}
+            >
+              <div className="text-3xl mb-2">📊</div>
+              <h3 className="font-playfair font-bold text-[#3D2C35] text-base leading-snug mb-3">
+                Scoring Guide
+              </h3>
+              <div className="text-left w-full space-y-2 text-xs text-[#3D2C35]">
+                <div className="flex justify-between">
+                  <span className="text-[#9A8490]">1 oz off</span>
+                  <span className="font-semibold">~28 pts</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#9A8490]">1 lb off</span>
+                  <span className="font-semibold">~454 pts</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#9A8490]">1 in off</span>
+                  <span className="font-semibold">~254 pts</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#9A8490]">1 day off</span>
+                  <span className="font-semibold">500 pts</span>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-[#F0E0E8] w-full">
+                <p className="text-[10px] text-[#9A8490] italic">Lower score = closer guess</p>
+              </div>
+            </div>
+          )}
+
           {/* Main card */}
           <div
             role="tabpanel"
@@ -213,6 +253,8 @@ export default function BabyPool() {
           )}
         </div>
       </div>
+        );
+      })()}
 
       <p className="text-center text-[#9A8490] text-xs mt-7 italic">
         Share this page with family &amp; friends so everyone can submit their guess ✨

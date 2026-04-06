@@ -56,6 +56,10 @@ export default function Leaderboard({ entries, config }: Props) {
     displayEntries = scored;
   }
 
+  const winner = isRevealed && displayEntries.length > 0
+    ? (displayEntries[0] as ScoredEntry)
+    : null;
+
   function exportCSV() {
     const headers = ["Name", "Weight Guess", "Length Guess", "Birth Date Guess"];
     const rows = entries.map((e) => [
@@ -122,6 +126,38 @@ export default function Leaderboard({ entries, config }: Props) {
                 <div className="text-[10px] text-[#9A8490]">{maxL?.name}</div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {winner && (
+        <div
+          className="fade-in rounded-2xl p-5 mb-5 text-center border-2 border-[#84A98C]"
+          style={{
+            background: "linear-gradient(135deg, #F0F7F1, #E8F5E9)",
+            boxShadow: "0 4px 20px rgba(132,169,140,0.25)",
+          }}
+        >
+          <div className="text-3xl mb-2">🏆</div>
+          <div className="text-xs font-medium tracking-wider uppercase text-[#84A98C] mb-1">
+            Winner
+          </div>
+          <div className="font-playfair font-bold text-xl text-[#3D2C35] mb-2">
+            {winner.name}
+          </div>
+          <div className="text-sm text-[#3D2C35] mb-1">
+            ⚖️ {winner.weight_lb} lb {winner.weight_oz} oz &nbsp;·&nbsp; 📏 {formatLength(winner)}
+          </div>
+          {winner.dob && (
+            <div className="text-sm text-[#3D2C35] mb-2">
+              📅 {winner.dob}
+            </div>
+          )}
+          <div
+            className="inline-block px-3 py-1 rounded-full text-sm font-semibold text-[#84A98C]"
+            style={{ background: "rgba(132,169,140,0.15)" }}
+          >
+            Score: {Math.round(winner.score).toLocaleString()}
           </div>
         </div>
       )}
