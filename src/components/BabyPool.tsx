@@ -139,7 +139,7 @@ export default function BabyPool() {
 
       {/* Card area — multi-column when side panels are active */}
       {(() => {
-        const showScoringPanel = config.isRevealed && config.actualWeight_g != null;
+        const showScoringPanel = config.isRevealed && config.actualWeight_g != null && tab === "leaderboard";
         const hasSidePanel = showScoringPanel || !!config.qrCodeUrl;
         const hasBothPanels = showScoringPanel && !!config.qrCodeUrl;
         const maxWidthClass = hasBothPanels ? "max-w-5xl" : hasSidePanel ? "max-w-3xl" : "max-w-lg";
